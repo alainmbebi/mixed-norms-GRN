@@ -11,3 +11,5 @@ R functions to implement all algorithms described in Gene regulatory network inf
 
 2. Although the codes here were tested on Fedora 29 (Workstation Edition) using R (version 3.6.1), they can run under any Linux or Windows OS distributions, as long as all the required packages are compatible with the desired R version.
 
+3. All data needed for implementation are freely available from [(Marbach et al. 2010)](https://www.nature.com/articles/nmeth.2016#MOESM584)
+
