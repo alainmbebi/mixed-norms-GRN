@@ -18,7 +18,7 @@ library(minet)
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # '@functions
 
-#function for the joint estimation for B and Omega in the mixed l1-l21 model
+#function for the joint estimation for B and Omega in the mixed l1l21 model
 Mixedl1l21<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
   diag_C_0=c(rep(1, ncol(Y)))       
   invdiag_C_0=1/diag_C_0 
@@ -48,7 +48,7 @@ Mixedl1l21<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
   Sigma_1=cov.shrink(Y-X%*%B_0)
   diag_C_1=l21B_0
   invdiag_C_1=1/l21B_0
-  Omega_1=glassoFast(Sigma_1, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi    #get the precision matrix at t=1 from glasso  
+  Omega_1=glassoFast(Sigma_1, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi   
   #----------------------
   Btilde1= matrix(0, nrow=ncol(V1), ncol=ncol(Y))
   K1=diag_C_1*Sigma_1
@@ -59,7 +59,6 @@ Mixedl1l21<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
   }
   B_1=V1%*%Btilde1
   #----------------------
-  #compute the l21norm for t(B_0) that will help to update invdiag_C_1
   l21B_1=c(rep(0, ncol(Y)))
   for(i in 1:ncol(Y)){
     l21B_1[i]=2*norm((t(B_1)[i,]),type = "2")# + zeta
@@ -81,12 +80,11 @@ Mixedl1l21<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
     Sigma_1=cov.shrink(Y-X%*%B_0)
     diag_C_1=l21B_0
     invdiag_C_1=1/l21B_0
-    Omega_1=glassoFast(Sigma_1, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi    #get the precision matrix at t=1 from glasso
+    Omega_1=glassoFast(Sigma_1, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi  
     #----------------------
     Btilde1= matrix(0, nrow=ncol(V1), ncol=ncol(Y))
     K1=diag_C_1*Sigma_1
     S1=t(V1)%*%(t(X))%*%Y
-    #library(Rlinsolve)
     for(j in 1:nrow(S1)){
       print(j)
       Btilde1[j,]=S1[j,]%*%solve((Gammma[j,j]^2)*diag(ncol(Y))+ 2*nrow(Y)*lambdaB*K1)
@@ -125,7 +123,7 @@ CV_Mixedl1l21<-function( X, Y, lambdaO.vect, lambdaB.vect, kfold=10){
           B_hat.train = Estimes.train[[1]]
           Omega_hat_train =  Estimes.train[[2]]
           Sigma_hat_train =  Estimes.train[[3]]
-          CV_errors[i,j] = mean(mse.matrix(X.valid%*%B_hat.train,Y.valid))#eventually use the RV coef
+          CV_errors[i,j] = mean(mse.matrix(X.valid%*%B_hat.train,Y.valid))
         }
        }
       }
