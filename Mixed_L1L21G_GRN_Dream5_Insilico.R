@@ -143,7 +143,7 @@ CV_Mixedl1l21_Gauss<-function( X, Y, lambdaO.vect, lambdaB.vect, kfold=10){
           B_hat.train = Estimes.train[[1]]
           Omega_hat_train =  Estimes.train[[2]]
           Sigma_hat_train =  Estimes.train[[3]]
-          CV_errors[i,j] = mean(mse.matrix(X.valid%*%B_hat.train,Y.valid))#eventually use the RV coef
+          CV_errors[i,j] = mean(mse.matrix(X.valid%*%B_hat.train,Y.valid))
         }
        }
       }
