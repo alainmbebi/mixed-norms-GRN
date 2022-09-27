@@ -111,16 +111,12 @@ CV_Mixedl2l21<-function( X, Y, lambdaO.vect, lambdaB.vect, kfold=3){
     
     leave.out = ind[(1 + floor((k - 1) * n/kfold)):floor(k * n/kfold)]
     
-    # training set
     Y.train = Y[-leave.out,]
     X.train = X[-leave.out,]
     Y.valid = Y[leave.out, ]
     X.valid = X[leave.out, ]
-
-    # loop over all tuning parameters
          for(i in 1:length(lambdaO.vect)){
          for(j in 1:length(lambdaB.vect)){
-          # compute the joint penalized regression matrix estimate with the iner training set
           Estimes.train = Mixedl2l21(X.train, Y.train, lambdaO.vect[i], lambdaB.vect[j]) 
           B_hat.train = Estimes.train[[1]]
           Omega_hat_train =  Estimes.train[[2]]
@@ -129,7 +125,6 @@ CV_Mixedl2l21<-function( X, Y, lambdaO.vect, lambdaB.vect, kfold=3){
         }
        }
       }
-    # determine optimal tuning parameters
   AVG = apply(CV_errors, 1, mean)
   error = min(AVG)
   opt = which.min(CV_errors) %% (dim(CV_errors)[1])
@@ -139,12 +134,10 @@ CV_Mixedl2l21<-function( X, Y, lambdaO.vect, lambdaB.vect, kfold=3){
   best.lamO = lambdaO.vect[opt.i]
   best.lamB = lambdaB.vect[opt.j]
 
-  #output on all data
   Estimes.all = Mixedl2l21(X, Y, best.lamO, best.lamB) 
   B_hat_final = Estimes.all[[1]]
   Omega_hat_final =  Estimes.all[[2]]
   Sigma_hat_final =  Estimes.all[[3]]
-  # return best values in lambdaO.vect, lambdaB.vect and other meaningful values
   return(list(best.lamO.final=best.lamO, best.lamB.final=best.lamB,
               B_hat_final=B_hat_final,Omega_hat_final=Omega_hat_final, Sigma_hat_final=Sigma_hat_final, min.error = error, avg.error = AVG, cv.err=CV_errors)) 
   
