@@ -17,13 +17,13 @@ library(minet)
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # '@functions
-#function for the joint estimation for B and Omega in the mixed L1L21 model
+#function for the joint estimation for B and Omega in the mixed L1L21G model
 Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-8, tol.out=1e-6){
   #----------------------
 
   Sigma_0=diag(ncol(Y))
   Omega_0=glassoFast(Sigma_0, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi
-  P0=t(chol(Sigma_0) + diag(zeta, ncol(Y)))               # to get the lower triangular matrix P (notice the transpose otherwise upper triangular)
+  P0=t(chol(Sigma_0) + diag(zeta, ncol(Y)))            
   
   #----------------------
   SVD_P0=svd(P0)
@@ -46,19 +46,14 @@ Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-8, tol.out=
     }
   }
   B_0=V1%*%Btilde0%*%t(U2_0)
-  
   #----------------------
-  #compute the l21norm for t(B_0) that will help to update invdiag_C_1
   l21B_0=c(rep(0, ncol(Y)))
   for(i in 1:ncol(Y)){
     l21B_0[i]=2*norm((t(B_0)[i,]),type = "2")
   }
-  
   #----------------------
-  #t=1 update
-  Sigma_1=cov.shrink(Y-X%*%B_0)  # estimate the cov as the shrinkage covariance estimator using cov.shrink(X)   # shrinkage estimate
-  Omega_1=glassoFast(Sigma_1, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi    #get the precision matrix at t=1 from glasso
-  #Omega_1=mpower(Sigma_1, -1)
+  Sigma_1=cov.shrink(Y-X%*%B_0) 
+  Omega_1=glassoFast(Sigma_1, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi   
   P1=t(chol(Sigma_1) + diag(zeta, ncol(Y)))      
   #----------------------
   SVD_P1=svd(P1)
@@ -74,17 +69,13 @@ Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-8, tol.out=
     }
   }
   B_1=V1%*%Btilde1%*%t(U2_1)
-  
   #----------------------
-  #compute the l21norm for t(B_0) that will help to update invdiag_C_1
   l21B_1=c(rep(0, ncol(Y)))
   for(i in 1:ncol(Y)){
     l21B_1[i]=2*norm((t(B_1)[i,]),type = "2")
   }
-
   #----------------------  
   tcontmixtl1l21_Gauss=0
-
   if((sum(l21B_1)<=sum(l21B_0))==TRUE && tcontmixtl1l21_Gauss<=itermax){
     l21B_0=l21B_1
     Sigma_0=Sigma_1
@@ -117,9 +108,7 @@ Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-8, tol.out=
       }
     }
     B_1=V1%*%Btilde1%*%t(U2_1)
-    
     #----------------------
-    
     tcontmixtl1l21_Gauss <- sum(tcontmixtl1l21_Gauss, 1)
     print(tcontmixtl1l21_Gauss)
     
