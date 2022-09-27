@@ -21,7 +21,7 @@ library(minet)
 Mixedl2l21_Gauss<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
   Sigma_0=diag(ncol(Y))
   Omega_0=(1/2*lambdaO)*(mpower(Sigma_0^2 + 8*lambdaO*diag(ncol(Y)), 1/2))-(1/2*lambdaO)*Sigma_0
-  P0=t(chol(Sigma_0) + diag(zeta, ncol(Y)))               # to get the lower triangular matrix P (notice the transpose otherwise upper triangular)
+  P0=t(chol(Sigma_0) + diag(zeta, ncol(Y)))              
   #----------------------
   SVD_P0=svd(P0)
   U2_0=SVD_P0$u
