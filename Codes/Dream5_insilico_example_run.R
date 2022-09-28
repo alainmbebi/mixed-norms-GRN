@@ -72,3 +72,4 @@ colnames(Omegahat_l1l21_D5_Scerevisiae) <- colnames(Y)
 Sigmahat_l1l21_D5_Scerevisiae=ttt$Sigmahat_l1l21
 rownames(Sigmahat_l1l21_D5_Scerevisiae) <- colnames(Y)
 colnames(Sigmahat_l1l21_D5_Scerevisiae) <- colnames(Y)
+
