@@ -8,8 +8,10 @@ R functions to implement all algorithms described in Gene regulatory network inf
   * Mixed_L2L21_GRN.R which computes L2L21
   * Mixed_L2L21G_GRN.R which computes L2L21G
 
+2. L1L21_Dream5_Scerevisiae_example_run.R is an example script using the L1L21 solution with S. cerevisiae data (Network 4 in DREAM5 challenge) 
 
-2. Although the codes here were tested on Fedora 29 (Workstation Edition) using R (version 3.6.1), they can run under any Linux or Windows OS distributions, as long as all the required packages are compatible with the desired R version.
 
-3. All data needed for implementation are freely available from [(Marbach et al. 2010)](https://www.nature.com/articles/nmeth.2016#MOESM584)
+3. Although the codes here were tested on Fedora 29 (Workstation Edition) using R (version 3.6.1), they can run under any Linux or Windows OS distributions, as long as all the required packages are compatible with the desired R version.
+
+4. All data needed for implementation are freely available from [(Marbach et al. 2010)](https://www.nature.com/articles/nmeth.2016#MOESM584)
 
