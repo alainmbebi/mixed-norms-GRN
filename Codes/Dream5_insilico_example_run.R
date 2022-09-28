@@ -1,8 +1,5 @@
-
+#This is an example run for L1L21 solution with in silico data (network 1)
 source("Mixed_L1L21_GRN.R")
-source("Mixed_L1L21G_GRN.R")
-source("Mixed_L2L21_GRN.R")
-source("Mixed_L2L21G_GRN.R")
 
 ##### read the expression profile matrix
 expr <- as.matrix(read.table(file = "net1_expression_data.tsv",header = T,sep = "\t",stringsAsFactors = F))
