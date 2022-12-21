@@ -32,11 +32,6 @@ GS <- ordernet(GS,TFs)
 GS_genes <- unique(c(GS$from,GS$to))
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-### If the goal is to learn new interactions, then select expression profiles for all genes
-#TGsexpr <- expr
-#TFsexpr <- expr[,colnames(expr)%in%TFs]
-
-### Otherwise (e.g. comparative analysis) select expression profiles for only GS genes only
 TGsexpr <- expr[,which(colnames(expr)%in%GS_genes)]
 TFsexpr <- TGsexpr[,colnames(TGsexpr)%in%TFs]
 TFs=colnames(TFsexpr)
@@ -46,7 +41,7 @@ TFs=colnames(TFsexpr)
 itermax=50 
 Y=TGsexpr #the response matrix 
 X=TFsexpr #the predictor matrix 
-#lambdaO=2^(-6) and lambdaB=0.8 are the optimal hyperparameters learned from 10-fold CV. This will also reproduce results in the manuscript.
+#lambdaO=2^(-6) and lambdaB=0.8 are the optimal hyperparameters learned from 10-fold CV. This will also reproduce results (for Scerevisiae) in the manuscript.
 ttt=Mixedl1l21(X, Y, lambdaO=2^(-6), lambdaB=0.8) 
 
 #Get the estimated regression coefficient matrix
