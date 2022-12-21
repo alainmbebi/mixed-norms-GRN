@@ -1,9 +1,7 @@
 # mixed-norms-GRN
-This is the source code for the manuscript "Gene regulatory network inference using mixed-norms regularized multivariate model with covariance selection", by Alain J. Mbebi & Zoran Nikoloski.
+This is the repository for the manuscript "Gene regulatory network inference using mixed-norms regularized multivariate model with covariance selection" by Alain J. Mbebi & Zoran Nikoloski.
 
-R functions to implement all algorithms described in Gene regulatory network inference using mixed-norms regularized multivariate model with covariance selection.
-
-#Repository organisation
+# Organisation
 
 1. The folder Codes contains the following R scripts with the K-folds cross-validation option to learn the hyperparameters:
   * Mixed_L1L21_GRN.R which computes L1L21-solution 
@@ -16,8 +14,8 @@ R functions to implement all algorithms described in Gene regulatory network inf
 
 3. The folder Inferred-networks contains all network objects for each dataset and each inference methods in the comparative analysis.
 
-# R dependencies and required packages for contenders
-The following packages are required dependencies for the contending approaches in the comparative analysis: "devtools", "foreach", "plyr", "doRNG", "glmnet" and "randomForest".
+# Dependencies and required packages
+The following packages are required for the contending approaches in the comparative analysis: "devtools", "foreach", "plyr", "doRNG", "glmnet" and "randomForest".
 
 # GENIE3
 The GENIE3 package can be installed from: http://bioconductor.org/packages/release/bioc/html/GENIE3.html
@@ -29,7 +27,7 @@ The TIGRESS repository can be obtained from: https://github.com/jpvert/tigress
 The ENNET repository can be obtained from: https://github.com/slawekj/ennet
 
 # PLSNET
-The Matlab source code of PLSNET can be obtained from https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-016-1398-6#Sec17
+The Matlab source code of PLSNET can be obtained from: https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-016-1398-6#Sec17
 
 # PORTIA 
 The PORTIA repository can be obtained from: https://github.com/AntoinePassemiers/PORTIA
