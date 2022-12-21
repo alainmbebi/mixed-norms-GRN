@@ -15,7 +15,7 @@ This is the repository for the manuscript "Gene regulatory network inference usi
 3. The folder Inferred-networks contains all network objects for each dataset and each inference methods in the comparative analysis.
 
 # Dependencies and required packages
-The following packages are required for the contending approaches in the comparative analysis: "devtools", "foreach", "plyr", "doRNG", "glmnet" and "randomForest".
+The following packages are required for the contending approaches in the comparative analysis: "devtools", "foreach", "plyr", "glmnet" and "randomForest".
 
 # GENIE3
 The GENIE3 package can be installed from: http://bioconductor.org/packages/release/bioc/html/GENIE3.html
