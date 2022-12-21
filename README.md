@@ -32,5 +32,8 @@ The Matlab source code of PLSNET can be obtained from: https://bmcbioinformatics
 # PORTIA 
 The PORTIA repository can be obtained from: https://github.com/AntoinePassemiers/PORTIA
 
+# D3GRN
+The D3GRN repository can be obtained from: https://github.com/chenxofhit/D3GRN
+
 4. Although the codes here were tested on Fedora 29 (Workstation Edition) using R (version 3.6.1), they can run under any Linux or Windows OS distributions, as long as all the required packages are compatible with the desired R version.
 
