@@ -13,25 +13,25 @@ R functions to implement all algorithms described in Gene regulatory network inf
   * L1L21_Dream5_Scerevisiae_example_run.R is an example run using the L1L21-solution with S. cerevisiae data (Network 4 in DREAM5 challenge) 
 
 2. The folder Figures contains all figures in the manuscript.
+
 3. The folder Inferred-networks contains all network objects for each dataset and each inference methods in the comparative analysis.
 
 # R dependencies and required packages for contenders
-install.packages(c("devtools", "foreach", "plyr", "doRNG", "glmnet", "randomForest"))
+The following packages are required dependencies for the contending approaches in the comparative analysis: "devtools", "foreach", "plyr", "doRNG", "glmnet" and "randomForest".
 
 # GENIE3
 The GENIE3 package can be installed from: http://bioconductor.org/packages/release/bioc/html/GENIE3.html
 
 # TIGRESS
-The ENNET repository can be obtained from: https://github.com/jpvert/tigress
+The TIGRESS repository can be obtained from: https://github.com/jpvert/tigress
 
-#ENNET
-
+# ENNET
 The ENNET repository can be obtained from: https://github.com/slawekj/ennet
 
-#PLSNET
+# PLSNET
 The Matlab source code of PLSNET can be obtained from https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-016-1398-6#Sec17
 
-#PORTIA 
+# PORTIA 
 The PORTIA repository can be obtained from: https://github.com/AntoinePassemiers/PORTIA
 
 4. Although the codes here were tested on Fedora 29 (Workstation Edition) using R (version 3.6.1), they can run under any Linux or Windows OS distributions, as long as all the required packages are compatible with the desired R version.
