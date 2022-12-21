@@ -1,5 +1,5 @@
-This is the source code for the manuscript "Gene regulatory network inference using mixed-norms regularized multivariate model with covariance selection", by Alain J. Mbebi & Zoran Nikoloski.
 # mixed-norms-GRN
+This is the source code for the manuscript "Gene regulatory network inference using mixed-norms regularized multivariate model with covariance selection", by Alain J. Mbebi & Zoran Nikoloski.
 
 R functions to implement all algorithms described in Gene regulatory network inference using mixed-norms regularized multivariate model with covariance selection.
 
