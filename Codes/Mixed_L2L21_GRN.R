@@ -6,28 +6,35 @@ set.seed(143)
 library(data.table)
 library(MASS)
 library(corpcor)
-library(Matrix)           
+library(Matrix)           # use Diagonal() when computing kronecker instead of diag()
 library(lattice)
+library(mvtnorm)
 library(glasso)           # This will help to estimate sparse Omega_Mixt using Graphical Lasso
-library(glassoFast)       # Faster alternative to glasso
+library(glassoFast)
 library(RColorBrewer)
 library(matrixcalc)
+library(glmnet)
 library(igraph)
 library(precrec)
 library(reshape2)
+
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# '@functions
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 #function for the joint estimation for B and Omega in the mixed l1-l21 model
 Mixedl2l21<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
-  #lambdaO regularization parameter on the precition matrix
-  #lambdaB regularization parameter on the regression coefficient matrix
-  #X is the matrix of predictors (TFs)
-  #Y is the matrix of responses (TGs)
-  #zeta is the treshold value when computing the l21norm to avoid division by zero
-  #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  #eps=1e-5, the algorithm will terminate if the minimum diagonal entry of the current iteration for
+  #residual sample covariance is less than eps.
+  #This may need adjustment depending on the scales of the variables.
+  #zeta=1e-8 is the treshold value when computing the l21norm to avoid division by zero
+  #----------------------
   
   # t=0 initialization
-  diag_C_0=c(rep(1, ncol(Y)))      
+  diag_C_0=c(rep(1, ncol(Y)))       # Initialize C as the identity matrix of dim the number nrow of W_true  
   invdiag_C_0=1/diag_C_0 
+
   P_0=diag(ncol(Y))
   Omega_0=(1/2*lambdaO)*(mpower(P_0^2 + 8*lambdaO*diag(ncol(Y)), 1/2))-(1/2*lambdaO)*P_0
 
@@ -54,7 +61,6 @@ Mixedl2l21<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
     l21B_0[i]=2*norm((t(B_0)[i,]),type = "2")# + zeta
   }
   
-  #----------------------
   P_1=round(cov.shrink(Y-X%*%B_0),9)
   diag_C_1=l21B_0
   invdiag_C_1=1/l21B_0
@@ -65,6 +71,7 @@ Mixedl2l21<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
   Btilde1= matrix(0, nrow=ncol(V1), ncol=ncol(Y))
   K1=diag_C_1*P_1
   S1=t(V1)%*%(t(X))%*%Y
+  #library(Rlinsolve)
   for(j in 1:nrow(S1)){
     print(j)
     Btilde1[j,]=S1[j,]%*%solve((Gammma[j,j]^2)*diag(ncol(Y))+ (2*nrow(Y)*lambdaB)*K1)
@@ -72,13 +79,13 @@ Mixedl2l21<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
   B_1=V1%*%Btilde1
   
   #----------------------
+  #compute the l21norm for t(B_0) that will help to update invdiag_C_1
   l21B_1=c(rep(0, ncol(Y)))
   for(i in 1:ncol(Y)){
     l21B_1[i]=2*norm((t(B_1)[i,]),type = "2")# + zeta
   }
   
   #----------------------
-  #t=2 update should follow in this way...
   
   tcontmixtl2l21=0
   if((sum(l21B_1)<=sum(l21B_0))==TRUE && tcontmixtl2l21<=itermax){
@@ -122,5 +129,56 @@ Mixedl2l21<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Mixedl2l21 cross validation
+CV_Mixedl2l21<-function( X, Y, lambdaO.vect, lambdaB.vect, kfold=3){
+  set.seed(123)
+  lambdaO.vect = sort(lambdaO.vect)
+  lambdaB.vect = sort(lambdaB.vect)
+  n = nrow(Y)
+  CV_errors = matrix(0, nrow=length(lambdaO.vect), ncol=length(lambdaB.vect))
+  ind=sample(n)
+  for (k in 1:kfold){
+    
+    leave.out = ind[(1 + floor((k - 1) * n/kfold)):floor(k * n/kfold)]
+    
+    # training set
+    Y.train = Y[-leave.out,]
+    X.train = X[-leave.out,]
+    Y.valid = Y[leave.out, ]
+    X.valid = X[leave.out, ]
 
+    # loop over all tuning parameters
+         for(i in 1:length(lambdaO.vect)){
+         for(j in 1:length(lambdaB.vect)){
+          Estimes.train = Mixedl2l21(X.train, Y.train, lambdaO.vect[i], lambdaB.vect[j]) 
+          B_hat.train = Estimes.train[[1]]
+          Omega_hat_train =  Estimes.train[[2]]
+          Sigma_hat_train =  Estimes.train[[3]]
+          CV_errors[i,j] = mean(mse.matrix(X.valid%*%B_hat.train,Y.valid))#eventually use the RV coef
+        }
+       }
+      }
+    # determine optimal tuning parameters
+  AVG = apply(CV_errors, 1, mean)
+  error = min(AVG)
+  opt = which.min(CV_errors) %% (dim(CV_errors)[1])
+  opt = (opt != 0)*opt + (opt == 0)*(dim(CV_errors)[1])
+  opt.i = opt
+  opt.j = which.min(CV_errors[opt,])
+  best.lamO = lambdaO.vect[opt.i]
+  best.lamB = lambdaB.vect[opt.j]
+
+  #output on all data
+  Estimes.all = Mixedl2l21(X, Y, best.lamO, best.lamB) 
+  B_hat_final = Estimes.all[[1]]
+  Omega_hat_final =  Estimes.all[[2]]
+  Sigma_hat_final =  Estimes.all[[3]]
+  # return best values in lambdaO.vect, lambdaB.vect and other meaningful values
+  return(list(best.lamO.final=best.lamO, best.lamB.final=best.lamB,
+              B_hat_final=B_hat_final,Omega_hat_final=Omega_hat_final, Sigma_hat_final=Sigma_hat_final, min.error = error, avg.error = AVG, cv.err=CV_errors)) 
+  
+}
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
