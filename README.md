@@ -9,6 +9,7 @@ This is the repository for the manuscript "Gene regulatory network inference usi
   * Mixed_L2L21_GRN.R which computes L2L21-solution
   * Mixed_L2L21G_GRN.R which computes L2L21G-solution
   * L1L21_Dream5_Scerevisiae_example_run.R is an example run using the L1L21-solution with S. cerevisiae data (Network 4 in DREAM5 challenge) 
+  All files needed to successfully run "L1L21_Dream5_Scerevisiae_example_run" are locaded in the folder Codes.
 
 2. The folder Figures contains all figures in the manuscript.
 
