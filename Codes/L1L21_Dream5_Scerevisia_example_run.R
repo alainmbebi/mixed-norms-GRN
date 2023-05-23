@@ -210,7 +210,7 @@ fTau_matrix <- function(x) {
   return(res)
 }
 
-################################To get figure in the manuscript
+################################To obtain the figure in the manuscript
 
 #L1L21
 Bhat_l1l21_D5_Scerevisiae<-t(as.matrix(read.csv("Bhat_l1l21_D5_Scerevisiae.csv", head=TRUE, row.names = 1, sep=","))) 
