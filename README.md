@@ -35,8 +35,11 @@ The PORTIA repository can be obtained from: https://github.com/AntoinePassemiers
 # D3GRN
 The Matlab source code of D3GRN can be obtained from: https://github.com/chenxofhit/D3GRN
 
+# Fused-LASSO
+The fused-LASSO repository can be obtained from: https://github.com/omranian/inference-of-GRN-using-Fused-LASSO
+
 # ANOVerence
 Because of some technical issues (e.g code's accessibility:  http://www2.bio.ifi.lmu.de/˜kueffner/anova.tar.gz), we were not able to reproduce ANOVerence results and used the inferred network from DREAM5 challenge instead.
 
-4. Although the codes here were tested on Fedora 29 (Workstation Edition) using R (version 3.6.1), they can run under any Linux or Windows OS distributions, as long as all the required packages are compatible with the desired R version.
+4. Although the codes here were tested on Fedora 29 (Workstation Edition) using R (version 4.2.2), they can run under any Linux or Windows OS distributions, as long as all the required packages are compatible with the desired R version.
 
