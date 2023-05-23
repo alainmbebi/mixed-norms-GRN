@@ -6,29 +6,34 @@ set.seed(143)
 library(data.table)
 library(MASS)
 library(corpcor)
-library(Matrix)           
+library(Matrix)           # use Diagonal() when computing kronecker instead of diag()
 library(lattice)
+library(mvtnorm)
 library(glasso)           # This will help to estimate sparse Omega_Mixt using Graphical Lasso
-library(glassoFast)       # Faster alternative to glasso
+library(glassoFast)
 library(RColorBrewer)
 library(matrixcalc)
+library(glmnet)
 library(igraph)
 library(precrec)
 library(reshape2)
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # '@functions
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #function for the joint estimation for B and Omega in the mixed l1-l21 model
-Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, zeta=1e-8){
-  #lambdaO regularization parameter on the precition matrix
-  #lambdaB regularization parameter on the regression coefficient matrix
-  #X is the matrix of predictors (TFs)
-  #Y is the matrix of responses (TGs)
-  #zeta is the treshold value when computing the l21norm to avoid division by zero
+Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, eps=1e-5, zeta=1e-6, tol.out=1e-6){
+  #eps=1e-5, the algorithm will terminate if the minimum diagonal entry of the current iteration for
+  #residual sample covariance is less than eps.
+  #This may need adjustment depending on the scales of the variables.
+  #zeta=1e-8 is the treshold value when computing the l21norm to avoid division by zero
   #----------------------
 
   Sigma_0=diag(ncol(Y))
+  #Sigma_0=cov(Y) + diag(zeta, ncol(Y))            # Initialize Omega as the sample covariance matrix of dim the number ncol of Y 
+  #Sigma_0=cov.shrink(Y)  # estimate the cov as the shrinkage covariance estimator using cov.shrink(X)   # shrinkage estimate
   Omega_0=glassoFast(Sigma_0, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi
   P0=t(chol(Sigma_0) + diag(zeta, ncol(Y)))               # to get the lower triangular matrix P (notice the transpose otherwise upper triangular)
   
@@ -65,7 +70,7 @@ Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, zeta=1e-8){
   #t=1 update
   Sigma_1=cov.shrink(Y-X%*%B_0)  # estimate the cov as the shrinkage covariance estimator using cov.shrink(X)   # shrinkage estimate
   Omega_1=glassoFast(Sigma_1, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi    #get the precision matrix at t=1 from glasso
-  P1=t(chol(Sigma_1) + diag(zeta, ncol(Y)))              
+  P1=t(chol(Sigma_1) + diag(zeta, ncol(Y)))               # to get the lower triangular matrix P (notice the transpose otherwise upper triangular)
   
   #----------------------
   SVD_P1=svd(P1)
@@ -91,7 +96,6 @@ Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, zeta=1e-8){
   }
 
   #----------------------
-  
   tcontmixtl1l21_Gauss=0
 
   if((sum(l21B_1)<=sum(l21B_0))==TRUE && tcontmixtl1l21_Gauss<=itermax){
@@ -113,14 +117,14 @@ Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, zeta=1e-8){
 
     #----------------------
     #Now we replace all values above
-    Sigma_1=cov.shrink(Y-X%*%B_0)  
-    Omega_1=glassoFast(Sigma_1, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi    
-    P1=t(chol(Sigma_1) + diag(zeta, ncol(Y)))              
+    Sigma_1=cov.shrink(Y-X%*%B_0)  # estimate the cov as the shrinkage covariance estimator using cov.shrink(X)   # shrinkage estimate
+    Omega_1=glassoFast(Sigma_1, rho=lambdaO,thr=1.0e-4, maxIt=1e4)$wi    #get the precision matrix at t=1 from glasso
+    P1=t(chol(Sigma_1) + diag(zeta, ncol(Y)))               # to get the lower triangular matrix P (notice the transpose otherwise upper triangular)
     
     #----------------------
     SVD_P1=svd(P1)
     U2_1=SVD_P1$u
-    Psi_1=diag(SVD_P1$d) + diag(zeta, ncol(Y)) 
+    Psi_1=diag(SVD_P1$d) + diag(zeta, ncol(Y)) #sxs
     V2_1=SVD_P1$v
     
     #----------------------
@@ -145,4 +149,55 @@ Mixedl1l21_Gauss<-function(X, Y, lambdaO, lambdaB, zeta=1e-8){
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Mixedl1l21_Gauss cross validation
+CV_Mixedl1l21_Gauss<-function( X, Y, lambdaO.vect, lambdaB.vect, kfold=3){
+  set.seed(123)
+  lambdaO.vect = sort(lambdaO.vect)
+  lambdaB.vect = sort(lambdaB.vect)
+  n = nrow(Y)
+  CV_errors = matrix(0, nrow=length(lambdaO.vect), ncol=length(lambdaB.vect))
+  ind=sample(n)
+  for (k in 1:kfold){
+    
+    leave.out = ind[(1 + floor((k - 1) * n/kfold)):floor(k * n/kfold)]
+    
+    # training set
+    Y.train = Y[-leave.out,]
+    X.train = X[-leave.out,]
+    Y.valid = Y[leave.out, ]
+    X.valid = X[leave.out, ]
 
+    # loop over all tuning parameters
+         for(i in 1:length(lambdaO.vect)){
+         for(j in 1:length(lambdaB.vect)){
+          Estimes.train = Mixedl1l21_Gauss(X.train, Y.train, lambdaO.vect[i], lambdaB.vect[j]) 
+          B_hat.train = Estimes.train[[1]]
+          Omega_hat_train =  Estimes.train[[2]]
+          Sigma_hat_train =  Estimes.train[[3]]
+          CV_errors[i,j] = mean(mse.matrix(X.valid%*%B_hat.train,Y.valid))#eventually use the RV coef
+        }
+       }
+      }
+    # determine optimal tuning parameters
+  AVG = apply(CV_errors, 1, mean)
+  error = min(AVG)
+  opt = which.min(CV_errors) %% (dim(CV_errors)[1])
+  opt = (opt != 0)*opt + (opt == 0)*(dim(CV_errors)[1])
+  opt.i = opt
+  opt.j = which.min(CV_errors[opt,])
+  best.lamO = lambdaO.vect[opt.i]
+  best.lamB = lambdaB.vect[opt.j]
+
+  #output on all data
+  Estimes.all = Mixedl1l21_Gauss(X, Y, best.lamO, best.lamB) 
+  B_hat_final = Estimes.all[[1]]
+  Omega_hat_final =  Estimes.all[[2]]
+  Sigma_hat_final =  Estimes.all[[3]]
+  # return best values in lambdaO.vect, lambdaB.vect and other meaningful values
+  return(list(best.lamO.final=best.lamO, best.lamB.final=best.lamB,
+              B_hat_final=B_hat_final,Omega_hat_final=Omega_hat_final, Sigma_hat_final=Sigma_hat_final, min.error = error, avg.error = AVG, cv.err=CV_errors)) 
+  
+}
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
