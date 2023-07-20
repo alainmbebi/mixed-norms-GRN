@@ -15,6 +15,8 @@ This is the repository for the manuscript "Gene regulatory network inference usi
 
 3. The folder Inferred-networks contains all network objects for each dataset and each inference methods in the comparative analysis.
 
+4. Due to the space limitation on this repository, all data along with predicted networks for the contending approaches have been made publicly available and can be accessed from https://zenodo.org/record/7965949. 
+
 # Dependencies and required packages
 The following packages are required for the contending approaches in the comparative analysis: "devtools", "foreach", "plyr", "glmnet" and "randomForest".
 
